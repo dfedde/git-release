@@ -1,0 +1,81 @@
+#!/bin/bash
+dev_branch='development'
+remote='origin'
+feature_prefix='feature-'
+feature_sufix=''
+sub_start(){
+  if [ -z $1 ]; then 
+    echo "Error: you must give a feature name" >&2
+    exit 1
+  fi
+  git checkout -b $feature_prefix$1$feature_sufix $dev_branch
+}
+
+sub_finish(){
+  if [ -z $1 ]; then
+    branch=`git rev-parse --abbrev-ref HEAD`
+  else
+    branch=$1
+  fi
+  if [[ $branch != $feature_prefix*$feature_sufix ]];then
+    echo "Error: you are not on a feature branch."
+    echo "please give a feature branch name or checkout a feature branch"
+    exit 1
+  fi
+  echo "doing a get pull"
+  git pull $remote $dev_branch
+  if [ $? -ne 0 ]; then
+    exit 1 
+  fi
+  echo "checking out devbranch"
+  git checkout $dev_branch
+  if [ $? -ne 0 ]; then
+    exit 1 
+  fi
+  echo "merging feature into devbranch"
+  git merge $branch --no-ff 
+  if [ $? -ne 0 ]; then
+    exit 1 
+  fi
+  echo "pushing devbranch to the server"
+  git push $remote $dev_branch
+  if [ $? -ne 0 ]; then
+    git checkout $branch
+    exit 1 
+  fi
+  echo delete old branch
+  git branch -d $branch
+  if [ $? -ne 0 ]; then
+    exit 1 
+  fi
+}
+
+sub_help(){
+  echo "Usage: git feature <subcomand>"
+  echo ""
+  echo "-h --help        display this help message"
+  echo ""
+  echo "Commands:"
+  echo ""
+  echo "start <name>     starts a new feature with <name>"
+  echo ""
+  echo "finish [name]    finish merger and push a feature."
+  echo "                 If name not given will use current branch"
+  echo ""
+}
+
+subcommand=$1
+case $subcommand in
+  "" | "-h" | "--help")
+    sub_help
+    ;;
+  *)
+    shift
+    sub_${subcommand} $@
+    if [ $? = 127 ]; then
+      echo "Error: '$subcommand' is not a known subcommand." >&2
+      echo " Run '$ProgName --help' for a list of known subcommands." >&2
+      exit 1
+    fi
+    ;;
+esac
