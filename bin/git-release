@@ -52,8 +52,13 @@ sub_finalize(){
     exit 1 
   fi
 
+  git tag -a $number $master_branch 
+  if [ $? -ne 0 ]; then
+    exit 1 
+  fi
+  
   echo "pushing master branch to the server"
-  git push $remote $master_branch
+  git push $remote $master_branch --tags
   if [ $? -ne 0 ]; then
     git checkout $branch
     exit 1 
@@ -65,15 +70,6 @@ sub_finalize(){
     exit 1 
   fi
   
-  git tag -a $number $master_branch 
-  if [ $? -ne 0 ]; then
-    exit 1 
-  fi
-  
-  git push $remote $master_branch --tags
-  if [ $? -ne 0 ]; then
-    exit 1 
-  fi
 }
 
 sub_help(){
