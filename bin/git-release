@@ -33,34 +33,44 @@ sub_finalize(){
   if [ $? -ne 0 ]; then
     exit 1 
   fi
-  
+
   echo "merging release into master branch"
   git merge $branch --no-ff 
   if [ $? -ne 0 ]; then
     exit 1 
   fi
-  
+
   echo "checking out development branch"
   git checkout $dev_branch
   if [ $? -ne 0 ]; then
     exit 1 
   fi
-  
+
   echo "merging release into devlopment branch"
   git merge $branch --no-ff 
   if [ $? -ne 0 ]; then
     exit 1 
   fi
-  
+
   echo "pushing master branch to the server"
   git push $remote $master_branch
   if [ $? -ne 0 ]; then
     git checkout $branch
     exit 1 
   fi
-  
+
   echo delete old branch
   git branch -d $branch
+  if [ $? -ne 0 ]; then
+    exit 1 
+  fi
+  
+  git tag -a $number $master_branch 
+  if [ $? -ne 0 ]; then
+    exit 1 
+  fi
+  
+  git push $remote $master_branch --tags
   if [ $? -ne 0 ]; then
     exit 1 
   fi
