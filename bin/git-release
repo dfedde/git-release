@@ -1,25 +1,26 @@
 #!/bin/bash
 dev_branch='development'
 remote='origin'
-feature_prefix='feature-'
-feature_sufix=''
-sub_start(){
+release_prefix='release-'
+release_sufix=''
+
+sub_stage(){
   if [ -z $1 ]; then 
-    echo "Error: you must give a feature name" >&2
+    echo "Error: you must give a release number" >&2
     exit 1
   fi
-  git checkout -b $feature_prefix$1$feature_sufix $dev_branch
+  git checkout -b $release_prefix$1$release_sufix $dev_branch
 }
 
-sub_finish(){
+sub_release(){
   if [ -z $1 ]; then
     branch=`git rev-parse --abbrev-ref HEAD`
   else
     branch=$1
   fi
-  if [[ $branch != $feature_prefix*$feature_sufix ]];then
-    echo "Error: you are not on a feature branch."
-    echo "please give a feature branch name or checkout a feature branch"
+  if [[ $branch != $release_prefix*$release_sufix ]];then
+    echo "Error: you are not on a release branch."
+    echo "please give a release branch name or checkout a release branch"
     exit 1
   fi
   echo "doing a get pull"
@@ -32,7 +33,7 @@ sub_finish(){
   if [ $? -ne 0 ]; then
     exit 1 
   fi
-  echo "merging feature into devbranch"
+  echo "merging release into devbranch"
   git merge $branch --no-ff 
   if [ $? -ne 0 ]; then
     exit 1 
@@ -51,15 +52,15 @@ sub_finish(){
 }
 
 sub_help(){
-  echo "Usage: git feature <subcomand>"
+  echo "Usage: git release <subcomand>"
   echo ""
   echo "-h --help        display this help message"
   echo ""
   echo "Commands:"
   echo ""
-  echo "start <name>     starts a new feature with <name>"
+  echo "start <name>     starts a new release with <name>"
   echo ""
-  echo "finish [name]    finish merger and push a feature."
+  echo "finish [name]    finish merger and push a release."
   echo "                 If name not given will use current branch"
   echo ""
 }
