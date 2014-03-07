@@ -1,5 +1,6 @@
 #!/bin/bash
 dev_branch='development'
+master_branch='master'
 remote='origin'
 release_prefix='release-'
 release_sufix=''
@@ -10,9 +11,10 @@ sub_stage(){
     exit 1
   fi
   git checkout -b $release_prefix$1$release_sufix $dev_branch
+  git push $remote $release_prefix$1$release_sufix 
 }
 
-sub_release(){
+sub_finalize(){
   if [ -z $1 ]; then
     branch=`git rev-parse --abbrev-ref HEAD`
   else
@@ -23,27 +25,38 @@ sub_release(){
     echo "please give a release branch name or checkout a release branch"
     exit 1
   fi
-  echo "doing a get pull"
-  git pull $remote $dev_branch
+
+  echo "checking out master branch"
+  git checkout $master_branch
   if [ $? -ne 0 ]; then
     exit 1 
   fi
-  echo "checking out devbranch"
-  git checkout $dev_branch
-  if [ $? -ne 0 ]; then
-    exit 1 
-  fi
-  echo "merging release into devbranch"
+  
+  echo "merging release into master branch"
   git merge $branch --no-ff 
   if [ $? -ne 0 ]; then
     exit 1 
   fi
-  echo "pushing devbranch to the server"
-  git push $remote $dev_branch
+  
+  echo "checking out development branch"
+  git checkout $dev_branch
+  if [ $? -ne 0 ]; then
+    exit 1 
+  fi
+  
+  echo "merging release into devlopment branch"
+  git merge $branch --no-ff 
+  if [ $? -ne 0 ]; then
+    exit 1 
+  fi
+  
+  echo "pushing master branch to the server"
+  git push $remote $master_branch
   if [ $? -ne 0 ]; then
     git checkout $branch
     exit 1 
   fi
+  
   echo delete old branch
   git branch -d $branch
   if [ $? -ne 0 ]; then
@@ -58,10 +71,10 @@ sub_help(){
   echo ""
   echo "Commands:"
   echo ""
-  echo "start <name>     starts a new release with <name>"
+  echo "stage <number>    starts a new release with <name>"
   echo ""
-  echo "finish [name]    finish merger and push a release."
-  echo "                 If name not given will use current branch"
+  echo "finalize [number] finish merge and push a release."
+  echo "                  If name not given will use current branch"
   echo ""
 }
 
