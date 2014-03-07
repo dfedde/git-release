@@ -20,6 +20,8 @@ sub_finalize(){
   else
     branch=$1
   fi
+  number=`echo $branch | sed -n "s/$release_prefix//p;s/$release_sufix//p"`
+  echo $number
   if [[ $branch != $release_prefix*$release_sufix ]];then
     echo "Error: you are not on a release branch."
     echo "please give a release branch name or checkout a release branch"
