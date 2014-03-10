@@ -63,6 +63,13 @@ sub_finalize(){
     git checkout $branch
     exit 1 
   fi
+ 
+  echo "pushing master branch to the server"
+  git push $remote $dev_branch
+  if [ $? -ne 0 ]; then
+    git checkout $branch
+    exit 1 
+  fi
 
   echo delete old branch
   git branch -d $branch
