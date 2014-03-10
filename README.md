@@ -28,12 +28,15 @@ to finish the feature
     
 Future updates
 ==============
-- add a update script
-- make release have tags denoting there release
+- deleate release branh from the remote
 
 
 Change log
 ==========
+
+v0.1.0
+- now pushes to devlopment and master
+- sets the tag on master to the version from the branch name
 
 v0.0.1
 - nothing this is the first release
