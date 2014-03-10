@@ -18,13 +18,13 @@ sub_finalize(){
   if [ -z $1 ]; then
     branch=`git rev-parse --abbrev-ref HEAD`
   else
-    branch=$1
+    branch=$release_prefix$1$release_sufix
   fi
   number=`echo $branch | sed -n "s/$release_prefix//p;s/$release_sufix//p"`
   echo $number
   if [[ $branch != $release_prefix*$release_sufix ]];then
     echo "Error: you are not on a release branch."
-    echo "please give a release branch name or checkout a release branch"
+    echo "please give a release number or checkout a release branch"
     exit 1
   fi
 
@@ -64,7 +64,7 @@ sub_finalize(){
     exit 1 
   fi
  
-  echo "pushing master branch to the server"
+  echo "pushing develop branch to the server"
   git push $remote $dev_branch
   if [ $? -ne 0 ]; then
     git checkout $branch
@@ -86,7 +86,7 @@ sub_help(){
   echo ""
   echo "Commands:"
   echo ""
-  echo "stage <number>    starts a new release with <name>"
+  echo "stage <number>    starts a new release with <number>"
   echo ""
   echo "finalize [number] finish merge and push a release."
   echo "                  If name not given will use current branch"
